@@ -1,36 +1,33 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { ThemeProvider, createTheme, CssBaseline } from "@mui/material";
-import { useState, useMemo } from "react";
-
-import HomePage from "./pages/HomePage";
-import DashboardPage from "./pages/DashboardPage";
-import BlogPage from "./pages/BlogPage";
+import { Suspense, useState } from "react";
+import { routes } from "./config/routes";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
-  // theme toggle (light/dark)
-  const [mode, setMode] = useState<"light" | "dark">("light");
 
-  const theme = useMemo(
-    () =>
-      createTheme({
-        palette: {
-          mode,
-        },
-      }),
-    [mode]
-  );
+  // 🚀 replace this with real auth later
+  const [userRole] = useState<"SUPER_ADMIN" | "ADMIN" | "MAINTAINER" | "USER" | "BLOGGER" | "GUEST">("GUEST");
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
       <Router>
-        <Routes>
-          <Route path="/" element={<HomePage toggleTheme={() => setMode(mode === "light" ? "dark" : "light")} />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/blog" element={<BlogPage />} />
-        </Routes>
+        <Suspense fallback={<div>Loading...</div>}>
+          <Routes>
+            {routes.map((route, i) => (
+              <Route
+                key={i}
+                path={route.path}
+                element={
+                  <ProtectedRoute
+                    element={route.element}
+                    allowedRoles={route.roles}
+                    userRole={userRole}
+                  />
+                }
+              />
+            ))}
+          </Routes>
+        </Suspense>
       </Router>
-    </ThemeProvider>
   );
 }
 
