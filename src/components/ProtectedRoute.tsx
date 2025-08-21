@@ -1,16 +1,18 @@
 import { Navigate } from "react-router-dom";
-import type { Role } from "../config/routes";
-import { JSX } from "react";
+import { useAppSelector } from "../store/hooks";
+import type { Role } from "../store/slices/userSlice";
 
 type Props = {
-  element: JSX.Element;
+  children: React.ReactNode;
   allowedRoles: Role[];
-  userRole: Role;
 };
 
-export default function ProtectedRoute({ element, allowedRoles, userRole }: Props) {
-  if (allowedRoles.includes(userRole)) {
-    return element;
-  }
-  return <Navigate to="/" replace />;
+export default function ProtectedRoute({ children, allowedRoles }: Props) {
+  const { isAuthenticated, role } = useAppSelector((state) => state.user);
+
+  if (!isAuthenticated) return <Navigate to="/" replace />;
+
+  if (!allowedRoles.includes(role)) return <h1>⛔ Access Denied</h1>;
+
+  return <>{children}</>;
 }
