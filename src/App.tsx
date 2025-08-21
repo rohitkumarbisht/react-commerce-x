@@ -1,33 +1,34 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { Suspense, useState } from "react";
-import { routes } from "./config/routes";
+import HomePage from "./pages/HomePage";
+import DashboardPage from "./pages/DashboardPage";
+import BlogPage from "./pages/BlogPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
-
-  // 🚀 replace this with real auth later
-  const [userRole] = useState<"SUPER_ADMIN" | "ADMIN" | "MAINTAINER" | "USER" | "BLOGGER" | "GUEST">("GUEST");
-
   return (
-      <Router>
-        <Suspense fallback={<div>Loading...</div>}>
-          <Routes>
-            {routes.map((route, i) => (
-              <Route
-                key={i}
-                path={route.path}
-                element={
-                  <ProtectedRoute
-                    element={route.element}
-                    allowedRoles={route.roles}
-                    userRole={userRole}
-                  />
-                }
-              />
-            ))}
-          </Routes>
-        </Suspense>
-      </Router>
+    <Router>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute allowedRoles={["SuperAdmin", "Admin"]}>
+              <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/blog"
+          element={
+            <ProtectedRoute allowedRoles={["Blogger", "Admin", "SuperAdmin"]}>
+              <BlogPage />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </Router>
   );
 }
 
